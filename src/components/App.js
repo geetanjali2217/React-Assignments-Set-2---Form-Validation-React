@@ -1,102 +1,160 @@
-import React, {Component, useState} from "react";
-import '../styles/App.css';
+import React, { Component, useState } from "react";
+import "../styles/App.css";
 
-const App = () => {
-  let [ErrorMessage, setErrorMessage] = useState("");
-  const [input, setinput] = useState({
-    Name: "",
+function App() {
+  const [formDetail, setFormDetails] = React.useState({
+    errorMessage: "",
+    username: null,
+    noError: false,
+    name: "",
     email: "",
-    Gender: "",
-    phone: "",
+    gender: "male",
+    phoneNumber: "",
     password: ""
   });
-  const handleclick = (e) => {
-    e.preventDefault();
-    let temp = input.Name;
-    let address = input.email;
-    let password = input.password;
-    temp = temp.replace(/\s+/g, "");
-    var RegEx = /^[a-z0-9]+$/i;
+
+  const checkForAlphanumeric = (name) => {
+    let alphaNumericCharacters =
+      "1234567890qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM";
+    let i = 0;
+    while (i < name.length) {
+      if (!alphaNumericCharacters.includes(name[i])) {
+        return true;
+      }
+      i++;
+    }
+    return false;
+  };
+
+  const getUsrename = (formObj) => {
+    let username = formObj.email.split("@")[0];
+    console.log(username);
+    return username;
+  };
+
+  const handelValueChange = (value, key) => {
+    let newFormDetail = { ...formDetail };
+    newFormDetail[key] = value;
+    setFormDetails(newFormDetail);
+  };
+
+  const handelClick = () => {
+    let newFormDetail = { ...formDetail };
+
     if (
-      input.email === "" ||
-      input.Name === "" ||
-      input.password === "" ||
-      input.Gender === "" ||
-      input.phone === ""
+      formDetail.name === "" ||
+      formDetail.email === "" ||
+      formDetail.phoneNumber === "" ||
+      formDetail.password === "" 
     ) {
-      setErrorMessage("Error Message: All fields are mandatory");
-      return;
-    }
-    if (!RegEx.test(temp)) {
-      setErrorMessage("Error Message: Name is not alphanumeric");
-      return;
-    }
-    if (!address.includes("@")) {
-      setErrorMessage("Email must contain @");
-      return;
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "All fields are mandatory";
+    } else if (checkForAlphanumeric(formDetail.name)) {
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "Name is not alphanumeric";
+    } else if (!formDetail.email.includes("@")) {
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "Email must contain @";
+    } else if (
+      formDetail.gender !== "male" &&
+      formDetail.gender !== "female" &&
+      formDetail.gender !== "other"
+    ) {
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "Please identify as male, female or others";
+    } else if (isNaN(formDetail.phoneNumber)) {
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "Phone Number must contain only numbers";
+    } else if (formDetail.password.length < 6) {
+      newFormDetail.noError = false;
+      newFormDetail.errorMessage = "Password must contain atleast 6 letters";
+    } else {
+      newFormDetail.noError = true;
+      newFormDetail.errorMessage = null;
     }
 
-    if (isNaN(input.phone)) {
-      setErrorMessage("Error Message: Phone Number must contain only numbers");
-      return;
-    }
-    if (password.length < 6) {
-      setErrorMessage("Error Message: Password must contain atleast 6 letters");
-      return;
-    }
-    let info = input.email;
-    info = info.substr(0, info.indexOf("@"));
-    console.log(info);
-    setErrorMessage("Hello " + info);
-    console.log(RegEx.test(temp));
-    console.log(input);
-  };
-  const handlechange = (e) => {
-    setinput((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value
-    }));
+    newFormDetail.username = getUsrename(formDetail);
+
+    setFormDetails(newFormDetail);
   };
 
   return (
     <div id="main">
-      <div>{ErrorMessage}</div>
-      <form>
-        <label>Name:</label>
-        <input data-testid="name" name="Name" onChange={handlechange} />
-        <br />
-        <label>Email address:</label>
-        <input data-testid="email" name="email" onChange={handlechange} />
-        <br />
-        <label>Gender:</label>
-        <select
-          defaultValue="selectgender"
-          name="Gender"
-          onChange={handlechange}
-        >
-          <option defaultValue>Male</option>
-          <option value="Female">Female</option>
-          <option value="others">Others</option>
-        </select>
-        <br />
-        <label>Phone number:</label>
-        <input data-testid="phoneNumber" name="phone" onChange={handlechange} />
-        <br />
-        <label>Password:</label>
+      <div className="formContainer">
+        <label className="label" for="name">
+          Name
+        </label>
         <input
-          data-testid="password"
-          type="password"
-          name="password"
-          onChange={handlechange}
+          type="text"
+          data-testid="name"
+          value={formDetail.name}
+          onChange={(event) => handelValueChange(event.target.value, "name")}
         />
-        <br />
-        <button data-testid="submit" onClick={handleclick}>
+
+        <label className="label" for="email">
+          email
+        </label>
+        <input
+          type="text"
+          data-testid="email"
+          value={formDetail.email}
+          onChange={(event) => handelValueChange(event.target.value, "email")}
+        />
+
+        <label className="label" for="gender">
+          gender
+        </label>
+        {/* <select
+            default={formDetail.gender}
+            onChange={(event) =>
+              handelValueChange(event.target.value, "gender")
+            }
+            data-testid="gender"
+          >
+            <option value="male">male</option>
+            <option value="female">female</option>
+            <option value="other">other</option>
+          </select> */}
+        <input
+          type="text"
+          value={formDetail.gender}
+          data-testid="gender"
+          onChange={(event) => handelValueChange(event.target.value, "gender")}
+        />
+
+        <label className="label" for="phoneNumber">
+          Phone Number
+        </label>
+        <input
+          type="text"
+          data-testid="phoneNumber"
+          value={formDetail.phoneNumber}
+          onChange={(event) =>
+            handelValueChange(event.target.value, "phoneNumber")
+          }
+        />
+
+        <label className="label" for="password">
+          password
+        </label>
+        <input
+          type="password"
+          data-testid="password"
+          value={formDetail.password}
+          onChange={(event) =>
+            handelValueChange(event.target.value, "password")
+          }
+        />
+
+        <button data-testid="submit" onClick={handelClick}>
           Submit
         </button>
-      </form>
+      </div>
+
+      {formDetail.noError && <div>Hello {formDetail.username}</div>}
+      {!formDetail.noError && <div>{formDetail.errorMessage}</div>}
     </div>
   );
-};
-
+}
 
 export default App;
